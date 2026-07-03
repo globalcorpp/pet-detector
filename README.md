@@ -1,1 +1,1 @@
-# animal-detector
+# Pet-detector
