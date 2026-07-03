@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detector</title>
+    <title>Pet Detector</title>
     <link rel="stylesheet" href="css/style.css">
     
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -42,7 +42,7 @@
         let model, webcam, maxPredictions;
         let isWebcamActive = false;
 
-        // تابع کمکی برای بارگذاری اولیه مدل (در صورت بارگذاری نشدن)
+        // Helper function to initialize the model early.
         async function loadModel() {
             if (!model) {
                 const modelURL = URL + "model.json";
@@ -52,25 +52,26 @@
             }
         }
 
-        // --- بخش مربوط به وبکم (Video) ---
         async function initWebcam() {
             await loadModel();
             
-            // مخفی کردن عکس قبلی در صورت وجود
+            // Hide previous image if it exists
             document.getElementById("image-preview").style.display = "none";
             const webcamContainer = document.getElementById("webcam-container");
             webcamContainer.style.display = "block";
 
             if (isWebcamActive) return;
-
-            webcam = new tmImage.Webcam(300, 300, true); // ابعاد متناسب با کانتینر
+            
+            // webcam container size
+            webcam = new tmImage.Webcam(300, 300, true);
             await webcam.setup();
             await webcam.play();
             
             isWebcamActive = true;
             window.requestAnimationFrame(loop);
 
-            webcamContainer.innerHTML = ""; // پاکسازی کانتینر
+            // cleaning container
+            webcamContainer.innerHTML = "";
             webcamContainer.appendChild(webcam.canvas);
         }
 
@@ -81,9 +82,8 @@
             window.requestAnimationFrame(loop);
         }
 
-        // --- بخش مربوط به آپلود عکس (Photo) ---
+        // upload image
         function triggerImageUpload() {
-            // شبیه‌سازی کلیک روی اینپوت مخفی فایل
             document.getElementById('file-input').click();
         }
 
@@ -91,7 +91,7 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // متوقف کردن وبکم در صورت فعال بودن
+            // stop webcam if it is active
             if (isWebcamActive && webcam) {
                 await webcam.stop();
                 isWebcamActive = false;
@@ -103,12 +103,11 @@
             const imgElement = document.getElementById("image-preview");
             imgElement.style.display = "block";
 
-            // خواندن فایل عکس و نمایش آن
+            // read and view image
             const reader = new FileReader();
             reader.onload = function (e) {
                 imgElement.src = e.target.result;
                 
-                // بعد از بارگذاری کامل عکس، تشخیص را انجام بده
                 imgElement.onload = async function() {
                     await predict(imgElement);
                 }
@@ -116,13 +115,13 @@
             reader.readAsDataURL(file);
         }
 
-        // --- تابع مشترک تشخیص و پردازش (Prediction) ---
+        // detect and proccess - prediction
         async function predict(inputElement) {
             if (!model) return;
 
             const prediction = await model.predict(inputElement);
             
-            // پیدا کردن بهترین پیش‌بینی بر اساس بیشترین احتمال
+            // Find the best prediction based on the highest probability
             const best = prediction.reduce((a, b) => a.probability > b.probability ? a : b);
 
             document.getElementById("animal").innerText = best.className;
