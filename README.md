@@ -10,4 +10,6 @@ For simplicity, I used only two pet animals: cats and dogs.
 
 I used AI assistance to improve the website layout and rearrange the elements
 
+You can't run this app locally because of CORS. Instead, use the Live Server extension in VS Code
+
 Feel free to improve it.
